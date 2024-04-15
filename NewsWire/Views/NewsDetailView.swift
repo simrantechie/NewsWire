@@ -9,29 +9,30 @@ import SwiftUI
 import WebKit
 
 struct NewsDetailView: View {
-    
+    @State var url: String
     var body: some View {
         NavigationView {
-            Text("Webview")
+           WebView(urlString: url)
         }
         .navigationTitle("Webview")
+        .navigationBarBackButtonHidden(false)
         
     }
 }
 
-//struct WebView: UIViewRepresentable {
-//    let urlString: String
-//
-//    func makeUIView(context: Context) -> some UIView {
-//        let webview = WKWebView()
-//        return webview
-//    }
-//
-//    func updateUIView(_ uiView: WKWebView, context: Context) {
-//        if let url = URL(string: urlString) {
-//            let request = URLRequest(url: url)
-//            uiView.load(request)
-//        }
-//    }
-//}
+struct WebView: UIViewRepresentable {
+    let urlString: String
+
+    func makeUIView(context: Context) -> WKWebView {
+        let webview = WKWebView()
+        return webview
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        if let url = URL(string: urlString) {
+            let request = URLRequest(url: url)
+            uiView.load(request)
+        }
+    }
+}
 

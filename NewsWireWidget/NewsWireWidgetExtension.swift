@@ -10,6 +10,7 @@ import SwiftUI
 import Intents
 
 struct Provider: IntentTimelineProvider {
+    @StateObject var viewModel = HomeViewModel()
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), configuration: ConfigurationIntent())
     }
@@ -21,7 +22,6 @@ struct Provider: IntentTimelineProvider {
 
     func getTimeline(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [SimpleEntry] = []
-
         // Generate a timeline consisting of five entries an hour apart, starting from the current date.
         let currentDate = Date()
         for hourOffset in 0 ..< 5 {
@@ -91,8 +91,9 @@ struct NewsWireSmallWidgetView : View  {
                 }
                 Spacer()
                 ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg")!)
-                    //.aspectRatio(contentMode: .fit)
-                    .frame(width: 40, height: 40, alignment: .center)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 50, height: 80, alignment: .center)
+                    .cornerRadius(8)
                     .padding(.leading, 8)
                     .padding(.trailing, 8)
             }
@@ -105,6 +106,7 @@ struct NewsWireSmallWidgetView : View  {
 
 
 struct NewsWireMediumWidgetView: View {
+    @StateObject var viewModel = HomeViewModel()
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -122,7 +124,7 @@ struct NewsWireMediumWidgetView: View {
             }
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
+                    Text(viewModel.dataModel?.articles.first?.title ?? "")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .padding(.leading, 10)
@@ -137,12 +139,23 @@ struct NewsWireMediumWidgetView: View {
                 Spacer()
                 ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg")!)
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 60, height: 60, alignment: .center)
+                    .frame(width: 80, height: 60, alignment: .top)
+                  //  .cornerRadius(5)
                     .padding(.leading, 10)
                     .padding(.trailing, 10)
             }
             
         }
+        .onAppear() {
+            viewModel.getData()
+        }
+        .overlay (
+            Group {
+//                if viewModel.dataModel == nil {
+//                    ProgressView()
+//                }
+            }
+        )
     }
 }
 
@@ -158,7 +171,6 @@ struct NewsWireLargeWidgetView: View {
                 Spacer()
                 Image("Carouselheader_5")
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
                     .frame(width: 35, height: 35, alignment: .center)
                     .padding(.trailing, 10)
             }
@@ -182,7 +194,7 @@ struct NewsWireLargeWidgetView: View {
                     Spacer()
                     ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg")!)
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 60, height: 60, alignment: .center)
+                        .frame(width: 80, height: 60, alignment: .top)
                         .padding(.leading, 10)
                         .padding(.trailing, 10)
                 }
@@ -213,37 +225,17 @@ struct NewsWireWidgetExtension_Previews: PreviewProvider {
 }
 
 struct ImageView: View {
-    @State private var image: Image?
-    
-    let url: URL
-    
-    init(url: URL) {
-        self.url = url
-    }
+    let url: URL?
     
     var body: some View {
-        if let image = image {
-            image
+        if let url = url, let imageData = try? Data(contentsOf: url), let uiImage = UIImage(data: imageData) {
+            
+            Image(uiImage: uiImage)
                 .resizable()
-                .scaledToFit()
+                .aspectRatio(contentMode: .fit)
         }
         else {
-            ProgressView()
-            .onAppear {
-                downloadImage()
-                
-            }
+            Image("apple")
         }
-    }
-    
-    private func downloadImage() {
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                DispatchQueue.main.async {
-                    self.image = Image(uiImage: UIImage(data: data)!)
-                }
-            }
-            
-        }.resume()
     }
 }

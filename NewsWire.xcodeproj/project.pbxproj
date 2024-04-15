@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FEDBA9952BCD17EF0013A288 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEFE51CC2BC914AC005BBE13 /* DataModel.swift */; };
+		FEDBA9962BCD17F60013A288 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEFE51CA2BC9149A005BBE13 /* ViewModel.swift */; };
+		FEDBA9972BCD17FC0013A288 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEFE51CE2BC914C4005BBE13 /* NetworkManager.swift */; };
 		FEFE51972BC91338005BBE13 /* NewsWireApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEFE51962BC91338005BBE13 /* NewsWireApp.swift */; };
 		FEFE519B2BC91339005BBE13 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FEFE519A2BC91339005BBE13 /* Assets.xcassets */; };
 		FEFE519E2BC91339005BBE13 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FEFE519D2BC91339005BBE13 /* Preview Assets.xcassets */; };
@@ -306,9 +309,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEDBA9952BCD17EF0013A288 /* DataModel.swift in Sources */,
 				FEFE51B92BC9135E005BBE13 /* NewsWireWidgetExtension.intentdefinition in Sources */,
 				FEFE51B22BC9135C005BBE13 /* NewsWireWidgetLiveActivity.swift in Sources */,
+				FEDBA9972BCD17FC0013A288 /* NetworkManager.swift in Sources */,
 				FEFE51B02BC9135C005BBE13 /* NewsWireWidgetBundle.swift in Sources */,
+				FEDBA9962BCD17F60013A288 /* ViewModel.swift in Sources */,
 				FEFE51B42BC9135C005BBE13 /* NewsWireWidgetExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -16,17 +16,17 @@ struct DataModel: Decodable {
 
 struct ArticlesModel: Decodable {
     var source: SourceModel
-   // var author: String
+    var author: String?
     var title: String
     var description: String
     var url: String
-   // var urlToImage: String
+    var urlToImage: String?
     var publishedAt: String
     var content: String
     
 }
 
 struct SourceModel: Decodable {
-  //  var id: Int
+    var id: Int?
     var name: String
 }
