@@ -49,7 +49,11 @@ struct HomeNewsView: View {
                             Spacer()
                         }
                         .onAppear() {
-                            viewModel.getData()
+                            viewModel.getData { (data, error) in
+                                if error != nil {
+                                   print(error)
+                                }
+                            }
                         }
                         .overlay (
                             Group {

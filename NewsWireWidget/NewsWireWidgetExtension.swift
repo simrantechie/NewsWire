@@ -10,34 +10,30 @@ import SwiftUI
 import Intents
 
 struct Provider: IntentTimelineProvider {
-    @StateObject var viewModel = HomeViewModel()
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationIntent())
+   var viewModel = HomeViewModel()
+    func placeholder(in context: Context) -> SampleEntry {
+        SampleEntry(date: Date(), data: DataModel(articles: []))
     }
 
-    func getSnapshot(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), configuration: configuration)
+    func getSnapshot(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (SampleEntry) -> ()) {
+        let entry = SampleEntry(date: Date(), data: DataModel(articles: [ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z"), ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z"), ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z"), ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z")]))
         completion(entry)
     }
 
     func getTimeline(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
+        
+        var entry: SampleEntry = SampleEntry(date: Date(), data: DataModel(articles: []))
+        viewModel.getData { (data, error)  in
+                entry = SampleEntry(date: Date(), data: data ?? DataModel(articles: []))
         }
-
-        let timeline = Timeline(entries: entries, policy: .atEnd)
+        let timeline = Timeline(entries: [entry], policy: .atEnd)
         completion(timeline)
     }
 }
 
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let configuration: ConfigurationIntent
+struct SampleEntry: TimelineEntry {
+    var date: Date
+    let data: DataModel
 }
 
 struct NewsWireWidgetExtensionEntryView : View {
@@ -48,9 +44,9 @@ struct NewsWireWidgetExtensionEntryView : View {
         case .systemSmall:
             NewsWireSmallWidgetView()
         case .systemMedium:
-            NewsWireMediumWidgetView()
+            NewsWireMediumWidgetView(articles: entry.data.articles)
         case .systemLarge:
-            NewsWireLargeWidgetView()
+            NewsWireLargeWidgetView(articles: entry.data.articles)
         @unknown default:
             EmptyView()
         }
@@ -106,7 +102,15 @@ struct NewsWireSmallWidgetView : View  {
 
 
 struct NewsWireMediumWidgetView: View {
+    @State var articles: [ArticlesModel]
     @StateObject var viewModel = HomeViewModel()
+    
+    let dateformatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        return formatter
+    }()
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -124,12 +128,12 @@ struct NewsWireMediumWidgetView: View {
             }
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(viewModel.dataModel?.articles.first?.title ?? "")
+                    Text(articles.first?.title ?? "")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .padding(.leading, 10)
-                    
-                    Text("6 min ago")
+                  
+                    Text(getFormattedTime(from:articles.first?.publishedAt ?? ""))
                         .font(.custom("Inter", size: 10))
                         .fontWeight(.bold)
                         .foregroundColor(.gray)
@@ -137,29 +141,50 @@ struct NewsWireMediumWidgetView: View {
                     
                 }
                 Spacer()
-                ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg")!)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 80, height: 60, alignment: .top)
-                  //  .cornerRadius(5)
-                    .padding(.leading, 10)
-                    .padding(.trailing, 10)
+                if let imagrURL = articles.first?.urlToImage, let url = URL(string: imagrURL) {
+                    ImageView(url: url)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 80, height: 60, alignment: .top)
+                      //  .cornerRadius(5)
+                        .padding(.leading, 10)
+                        .padding(.trailing, 10)
+                }
+                else {
+                    ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 80, height: 60, alignment: .top)
+                      //  .cornerRadius(5)
+                        .padding(.leading, 10)
+                        .padding(.trailing, 10)
+                }
+                
             }
             
         }
-        .onAppear() {
-            viewModel.getData()
-        }
-        .overlay (
-            Group {
-//                if viewModel.dataModel == nil {
-//                    ProgressView()
-//                }
-            }
-        )
     }
+    
+    func getFormattedTime(from dateString: String) -> String {
+        if let date = dateformatter.date(from: dateString) {
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "h:mm:a"
+            return timeFormatter.string(from: date)
+        }
+        else {
+            return "Invalid Date"
+        }
+    }
+    
 }
 
 struct NewsWireLargeWidgetView: View {
+    @State var articles: [ArticlesModel]
+    
+    let dateformatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        return formatter
+    }()
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -176,30 +201,53 @@ struct NewsWireLargeWidgetView: View {
             }
             .padding(5)
             
-            ForEach(0..<3) {item in
-                HStack {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .padding(.leading, 10)
-                        
-                        Text("6 min ago")
-                            .font(.custom("Inter", size: 10))
-                            .fontWeight(.bold)
-                            .foregroundColor(.gray)
-                            .padding(.leading, 10)
-                        
+            if articles.count != 0 {
+                ForEach(1..<4) { index in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(articles[index].title)
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .padding(.leading, 10)
+                            
+                            Text(getFormattedTime(from: articles[index].publishedAt))
+                                .font(.custom("Inter", size: 10))
+                                .fontWeight(.bold)
+                                .foregroundColor(.gray)
+                                .padding(.leading, 10)
+                            
+                        }
+                        Spacer()
+                        if let imagrURL = articles[index].urlToImage, let url = URL(string: imagrURL) {
+                            ImageView(url: url)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 80, height: 60, alignment: .top)
+                                .padding(.leading, 10)
+                                .padding(.trailing, 10)
+                        }
+                        else {
+                            ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 80, height: 60, alignment: .top)
+                                .padding(.leading, 10)
+                                .padding(.trailing, 10)
+                        }
+                       
                     }
-                    Spacer()
-                    ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg")!)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 80, height: 60, alignment: .top)
-                        .padding(.leading, 10)
-                        .padding(.trailing, 10)
+                    .padding(5)
                 }
-                .padding(5)
             }
+        }
+    }
+    
+    func getFormattedTime(from dateString: String) -> String {
+        if let date = dateformatter.date(from: dateString) {
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "h:mm:a"
+            return timeFormatter.string(from: date)
+        }
+        else {
+            return "Invalid Date"
         }
     }
 }
@@ -211,18 +259,18 @@ struct NewsWireWidgetExtension: Widget {
         IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider()) { entry in
             NewsWireWidgetExtensionEntryView(entry: entry)
         }
-        .configurationDisplayName("NewsWire Widget")
-        .description("This is an NewsWire widget.")
-      //  .supportedFamilies([.systemSmall])
+        .configurationDisplayName("Today")
+        .description("Get today's headlines and news.")
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
-struct NewsWireWidgetExtension_Previews: PreviewProvider {
-    static var previews: some View {
-        NewsWireWidgetExtensionEntryView(entry: SimpleEntry(date: Date(), configuration: ConfigurationIntent()))
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-    }
-}
+//struct NewsWireWidgetExtension_Previews: PreviewProvider {
+//    static var previews: some View {
+//        NewsWireWidgetExtensionEntryView(entry: SampleEntry(date: Date(), data: DataModel(status: "", totalResults: 2, articles: [])))
+//            .previewContext(WidgetPreviewContext(family: .systemSmall))
+//    }
+//}
 
 struct ImageView: View {
     let url: URL?
