@@ -16,7 +16,10 @@ struct Provider: IntentTimelineProvider {
     }
 
     func getSnapshot(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (SampleEntry) -> ()) {
-        let entry = SampleEntry(date: Date(), data: DataModel(articles: [ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z"), ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z"), ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z"), ArticlesModel(title: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner", description: "White House Report Card: Inflation, Bidenomics choking the nation - Washington Examiner Desc", url: "https://www.washingtonexaminer.com/news/washington-secrets/2965121/white-house-report-card-inflation-bidenomics-choking-the-nation/", urlToImage: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg", publishedAt: "2024-04-13T13:17:27Z")]))
+        var entry: SampleEntry = SampleEntry(date: Date(), data: DataModel(articles: []))
+        viewModel.getData { (data, error)  in
+                entry = SampleEntry(date: Date(), data: data ?? DataModel(articles: []))
+        }
         completion(entry)
     }
 
@@ -26,7 +29,8 @@ struct Provider: IntentTimelineProvider {
         viewModel.getData { (data, error)  in
                 entry = SampleEntry(date: Date(), data: data ?? DataModel(articles: []))
         }
-        let timeline = Timeline(entries: [entry], policy: .atEnd)
+        let refreshDate = Calendar.current.date(byAdding: .second, value: 1, to: Date())
+        let timeline = Timeline(entries: [entry], policy: .after(refreshDate!))
         completion(timeline)
     }
 }
@@ -42,7 +46,7 @@ struct NewsWireWidgetExtensionEntryView : View {
     var body: some View {
         switch family {
         case .systemSmall:
-            NewsWireSmallWidgetView()
+            NewsWireSmallWidgetView(articles: entry.data.articles)
         case .systemMedium:
             NewsWireMediumWidgetView(articles: entry.data.articles)
         case .systemLarge:
@@ -56,46 +60,26 @@ struct NewsWireWidgetExtensionEntryView : View {
 
 
 struct NewsWireSmallWidgetView : View  {
+    @State var articles: [ArticlesModel]
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Top News")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.red)
-                    .padding(.leading, 8)
-                Spacer()
-                Image("Carouselheader_5")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20, alignment: .center)
-                    .padding(.trailing, 5)
+        ZStack {
+            if let imagrURL = articles.first?.urlToImage, let url = URL(string: imagrURL) {
+                ImageView(url: url)
+                    .aspectRatio(contentMode: .fill)
             }
-            HStack {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
-                        .font(.custom("Inter", size: 10))
-                        .fontWeight(.semibold)
-                        .padding(.leading, 8)
-                    
-                    Text("6 min ago")
-                        .font(.custom("Inter", size: 10))
-                        .fontWeight(.bold)
-                        .foregroundColor(.gray)
-                        .padding(.leading, 8)
-                    
-                }
-                Spacer()
-                ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg")!)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 50, height: 80, alignment: .center)
-                    .cornerRadius(8)
-                    .padding(.leading, 8)
-                    .padding(.trailing, 8)
+            else {
+                ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
+                    .aspectRatio(contentMode: .fill)
             }
-            
-        }
-        .onAppear() {
+          //  VStack() {
+                Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
+                    .font(.custom("Inter", size: 15))
+                    .fontWeight(.semibold)
+                    .padding(.leading, 10)
+                    .padding(.trailing, 10)
+                    .padding(.bottom, 10)
+                    .foregroundColor(.white)
+          //  }
         }
     }
 }
