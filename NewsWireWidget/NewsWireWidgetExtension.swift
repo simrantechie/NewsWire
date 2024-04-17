@@ -62,7 +62,7 @@ struct NewsWireWidgetExtensionEntryView : View {
 struct NewsWireSmallWidgetView : View  {
     @State var articles: [ArticlesModel]
     var body: some View {
-        ZStack {
+        VStack(alignment: .leading, spacing: 8) {
             if let imagrURL = articles.first?.urlToImage, let url = URL(string: imagrURL) {
                 ImageView(url: url)
                     .aspectRatio(contentMode: .fill)
@@ -70,16 +70,21 @@ struct NewsWireSmallWidgetView : View  {
             else {
                 ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
                     .aspectRatio(contentMode: .fill)
+                    .overlay(
+                        
+                        ZStack {
+                            Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .padding()
+                                .cornerRadius(4)
+                                .foregroundColor(.white)
+                        }
+                            .padding(.horizontal, 10),
+                        alignment: .bottomTrailing
+                    )
+                
             }
-          //  VStack() {
-                Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
-                    .font(.custom("Inter", size: 15))
-                    .fontWeight(.semibold)
-                    .padding(.leading, 10)
-                    .padding(.trailing, 10)
-                    .padding(.bottom, 10)
-                    .foregroundColor(.white)
-          //  }
         }
     }
 }
@@ -245,7 +250,7 @@ struct NewsWireWidgetExtension: Widget {
         }
         .configurationDisplayName("Today")
         .description("Get today's headlines and news.")
-        .supportedFamilies([.systemMedium, .systemLarge])
+        //.supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
