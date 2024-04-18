@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeNewsView: View {
+    
     @StateObject var viewModel = HomeViewModel()
     @State private var detailBtn = false
     @State private var indexCount = 0
@@ -15,13 +16,13 @@ struct HomeNewsView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                let count = viewModel.dataModel?.articles.count ?? 0
+                let details = viewModel.dataModel?.articles
                 if detailBtn == false {
                     ForEach(1..<7) { index in
                         VStack {
-                            Text(viewModel.dataModel?.articles[index].title ?? "")
+                            Text(details![index].title)
                                 .padding()
-                            if let imagrURL = viewModel.dataModel?.articles[index].urlToImage, let url = URL(string: imagrURL) {
+                            if let imagrURL = details![index].urlToImage, let url = URL(string: imagrURL) {
                                 ImageView(url: url)
                                     .frame(height: 200)
                                     .cornerRadius(10)
@@ -31,7 +32,7 @@ struct HomeNewsView: View {
                                 Text("Image not available")
                                     .foregroundColor(.red)
                             }
-                            Text(viewModel.dataModel?.articles[index].description ?? "")
+                            Text(details![index].description)
                                 .padding()
                             Button {
                                 indexCount = index
@@ -51,7 +52,7 @@ struct HomeNewsView: View {
                         .onAppear() {
                             viewModel.getData { (data, error) in
                                 if error != nil {
-                                   print(error)
+                                   // error
                                 }
                             }
                         }
@@ -65,7 +66,12 @@ struct HomeNewsView: View {
                     }
                 }
                 else {
-                    NavigationLink("", destination: NewsDetailView(url: viewModel.dataModel?.articles[indexCount].url ?? ""), isActive: $detailBtn)
+                    NavigationLink(
+                        destination: NewsDetailView(url: details![indexCount].url),
+                        isActive: $detailBtn
+                    ) {
+                        Text("")
+                    }
                 }
             }
                 .navigationTitle("Headlines")

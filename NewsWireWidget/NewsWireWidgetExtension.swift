@@ -10,7 +10,9 @@ import SwiftUI
 import Intents
 
 struct Provider: IntentTimelineProvider {
+    
    var viewModel = HomeViewModel()
+    
     func placeholder(in context: Context) -> SampleEntry {
         SampleEntry(date: Date(), data: DataModel(articles: []))
     }
@@ -63,27 +65,20 @@ struct NewsWireSmallWidgetView : View  {
     @State var articles: [ArticlesModel]
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let imagrURL = articles.first?.urlToImage, let url = URL(string: imagrURL) {
+            if let imagrURL = articles.last?.urlToImage, let url = URL(string: imagrURL) {
                 ImageView(url: url)
                     .aspectRatio(contentMode: .fill)
-            }
-            else {
-                ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
-                    .aspectRatio(contentMode: .fill)
                     .overlay(
-                        
                         ZStack {
-                            Text("Jon Stewart Confirms Apple Wouldn't Let Him Do Show on AI With FTC Chair")
-                                .font(.caption)
+                            Text(articles.last!.title)
+                                .font(.headline)
                                 .fontWeight(.bold)
-                                .padding()
-                                .cornerRadius(4)
+                                .frame(width: 150)
                                 .foregroundColor(.white)
                         }
-                            .padding(.horizontal, 10),
-                        alignment: .bottomTrailing
+                            .padding(10),
+                        alignment: .bottom
                     )
-                
             }
         }
     }
@@ -117,12 +112,12 @@ struct NewsWireMediumWidgetView: View {
             }
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(articles.first?.title ?? "")
+                    Text(articles.last?.title ?? "")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .padding(.leading, 10)
                   
-                    Text(getFormattedTime(from:articles.first?.publishedAt ?? ""))
+                    Text(getFormattedTime(from:articles.last?.publishedAt ?? ""))
                         .font(.custom("Inter", size: 10))
                         .fontWeight(.bold)
                         .foregroundColor(.gray)
@@ -130,23 +125,13 @@ struct NewsWireMediumWidgetView: View {
                     
                 }
                 Spacer()
-                if let imagrURL = articles.first?.urlToImage, let url = URL(string: imagrURL) {
+                if let imagrURL = articles.last?.urlToImage, let url = URL(string: imagrURL) {
                     ImageView(url: url)
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 80, height: 60, alignment: .top)
-                      //  .cornerRadius(5)
                         .padding(.leading, 10)
                         .padding(.trailing, 10)
                 }
-                else {
-                    ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 80, height: 60, alignment: .top)
-                      //  .cornerRadius(5)
-                        .padding(.leading, 10)
-                        .padding(.trailing, 10)
-                }
-                
             }
             
         }
@@ -159,7 +144,7 @@ struct NewsWireMediumWidgetView: View {
             return timeFormatter.string(from: date)
         }
         else {
-            return "Invalid Date"
+            return ""
         }
     }
     
@@ -214,14 +199,6 @@ struct NewsWireLargeWidgetView: View {
                                 .padding(.leading, 10)
                                 .padding(.trailing, 10)
                         }
-                        else {
-                            ImageView(url: URL(string: "https://www.thestreet.com/.image/ar_1.91%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_1200/MjAxNTgyMzcwMTg3Mzg4Mjg5/taiwan-technology-foxconn-nvidia.jpg"))
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 80, height: 60, alignment: .top)
-                                .padding(.leading, 10)
-                                .padding(.trailing, 10)
-                        }
-                       
                     }
                     .padding(5)
                 }
@@ -229,6 +206,7 @@ struct NewsWireLargeWidgetView: View {
         }
     }
     
+    //MARK:- Date formatter to format date from api
     func getFormattedTime(from dateString: String) -> String {
         if let date = dateformatter.date(from: dateString) {
             let timeFormatter = DateFormatter()
@@ -249,21 +227,13 @@ struct NewsWireWidgetExtension: Widget {
             NewsWireWidgetExtensionEntryView(entry: entry)
         }
         .configurationDisplayName("Today")
-        .description("Get today's headlines and news.")
-        //.supportedFamilies([.systemMedium, .systemLarge])
+        .description("Get Today's Headlines And News.")
     }
 }
 
-//struct NewsWireWidgetExtension_Previews: PreviewProvider {
-//    static var previews: some View {
-//        NewsWireWidgetExtensionEntryView(entry: SampleEntry(date: Date(), data: DataModel(status: "", totalResults: 2, articles: [])))
-//            .previewContext(WidgetPreviewContext(family: .systemSmall))
-//    }
-//}
 
 struct ImageView: View {
     let url: URL?
-    
     var body: some View {
         if let url = url, let imageData = try? Data(contentsOf: url), let uiImage = UIImage(data: imageData) {
             

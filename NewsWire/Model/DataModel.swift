@@ -8,9 +8,6 @@
 import Foundation
 
 struct DataModel: Decodable {
-    
-//    var status: String
-   // var totalResults: Int
     var articles: [ArticlesModel]
 }
 
@@ -22,8 +19,3 @@ struct ArticlesModel: Decodable {
     var publishedAt: String
     
 }
-//
-//struct SourceModel: Decodable {
-//    //  var id: Int?
-//    var name: String
-//}
