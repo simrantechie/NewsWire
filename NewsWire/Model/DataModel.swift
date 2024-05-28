@@ -12,10 +12,9 @@ struct DataModel: Decodable {
 }
 
 struct ArticlesModel: Decodable {
-    var title: String
-    var description: String
-    var url: String
+    var title: String?
+    var description: String?
+    var url: String?
     var urlToImage: String?
-    var publishedAt: String
-    
+    var publishedAt: String?
 }

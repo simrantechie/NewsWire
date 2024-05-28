@@ -8,9 +8,7 @@
 import Foundation
 
 class Manager {
-    
     static let shared = Manager()
-    
     func sendGetRequestWithURLSession<T: Decodable>(url: URL, type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
 
         var request = URLRequest(url: url, timeoutInterval: Double.infinity)
@@ -20,12 +18,12 @@ class Manager {
             guard let data = data, error == nil else {
                 let errorMessage = error?.localizedDescription ?? "Unknown error"
                 print(errorMessage)
-                completion(.failure(errorMessage as! Error))
+                completion(.failure(URLError(.downloadDecodingFailedToComplete)))
                 return
             }
             do {
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
-                print(String(data: data, encoding: .utf8)!)
+              //  print(String(data: data, encoding: .utf8)!)
                 completion(.success(decodedData))
             } catch {
                 let errorMessage = error.localizedDescription
@@ -34,5 +32,4 @@ class Manager {
             }
         }.resume()
     }
-    
 }

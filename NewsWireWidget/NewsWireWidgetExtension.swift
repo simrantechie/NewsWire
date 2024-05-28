@@ -7,7 +7,7 @@
 
 import WidgetKit
 import SwiftUI
-import Intents
+//import Intents
 
 struct Provider: IntentTimelineProvider {
     
@@ -70,7 +70,7 @@ struct NewsWireSmallWidgetView : View  {
                     .aspectRatio(contentMode: .fill)
                     .overlay(
                         ZStack {
-                            Text(articles.last!.title)
+                            Text(articles.last!.title!)
                                 .font(.headline)
                                 .fontWeight(.bold)
                                 .frame(width: 150)
@@ -179,12 +179,12 @@ struct NewsWireLargeWidgetView: View {
                 ForEach(1..<4) { index in
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(articles[index].title)
+                            Text(articles[index].title!)
                                 .font(.footnote)
                                 .fontWeight(.semibold)
                                 .padding(.leading, 10)
                             
-                            Text(getFormattedTime(from: articles[index].publishedAt))
+                            Text(getFormattedTime(from: articles[index].publishedAt!))
                                 .font(.custom("Inter", size: 10))
                                 .fontWeight(.bold)
                                 .foregroundColor(.gray)
